@@ -5,6 +5,7 @@ from fake_useragent import UserAgent
 import time
 import random
 import os
+import json
 
 class PreSaleQuery():
     def __init__(self, cinemaId, movieName):
@@ -19,7 +20,7 @@ class PreSaleQuery():
         # Fake User Agent
         ua = UserAgent(verify_ssl=False)
         header = {"User-Agent": ua.random}
-        req = requests.get(url=target, headers=header)
+        req = requests.get(url=target, headers=header, proxies=self.getProxy())
         html = req.text
         bf = BeautifulSoup(html, 'html.parser')
         cinema_title_html = bf.find_all('h3', class_='name text-ellipsis')
@@ -31,6 +32,13 @@ class PreSaleQuery():
         print("> 检查时间：", formatTime)
         print("> 电影：", self.movieName)
         print("> 影院：", cinema_title_html[0].get_text())
+
+    def getProxy(self):
+        api = requests.get("http://ip.jiangxianli.com/api/proxy_ip")
+        proxyData = api.json()
+        proxy = 'http:\\' + proxyData['data']['ip'] + ':' + proxyData['data']['port']
+        proxies = {'proxy': proxy}
+        return proxies
 
     def accurateCheck(self):
         print("> 精准匹配结果：", end="")
@@ -63,7 +71,7 @@ class PreSaleQuery():
 
 if __name__ == '__main__':
     cinemaID = 14409
-    search_movie = '雷霆沙赞'
+    search_movie = '复仇者联盟4：终局之战'
     ps = PreSaleQuery(cinemaID, search_movie)
     ps.loopCheck()
 
