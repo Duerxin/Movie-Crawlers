@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from fuzzywuzzy import fuzz, process
+from fake_useragent import UserAgent
 import time
 
 class PreSaleQuery():
@@ -11,7 +12,11 @@ class PreSaleQuery():
 
     def getPage(self):
         target = 'https://maoyan.com/cinema/'+str(self.cinemaId)
-        req = requests.get(url=target)
+
+        # Fake User Agent
+        ua = UserAgent(verify_ssl=False)
+        header = {"User-Agent": ua.random}
+        req = requests.get(url=target, headers=header)
         html = req.text
         bf = BeautifulSoup(html, 'html.parser')
         cinema_title_html = bf.find_all('h3', class_='name text-ellipsis')
